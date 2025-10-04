@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PreSeizure — Wearable AI Seizure Prediction</title>
+
+  <!-- Chart.js for graphs -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root{
+      --bg:#f7f9fc;
+      --card:#ffffff;
+      --accent:#2b6cb0;
+      --muted:#6b7280;
+      --glass: rgba(255,255,255,0.6);
+      --radius:12px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(180deg, #f7fbff 0%, var(--bg) 100%);
+      color:#0f172a;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      line-height:1.5;
+    }
+    header{
+      background: linear-gradient(90deg,var(--accent), #4b79a1);
+      color:white;
+      padding:48px 18px;
+      text-align:center;
+      clip-path: ellipse(100% 85% at 50% 0%);
+    }
+    header h1{margin:0;font-size:2.2rem;letter-spacing:0.2px}
+    header p{margin:8px 0 0;font-size:1rem;opacity:0.95}
+
+    .container{
+      max-width:1000px;
+      margin: -36px auto 80px;
+      padding:24px;
+    }
+
+    .card{
+      background:var(--card);
+      border-radius:var(--radius);
+      padding:20px;
+      box-shadow: 0 8px 30px rgba(15,23,42,0.06);
+      margin-bottom:20px;
+      opacity:0;
+      transform: translateY(12px);
+      transition: all 600ms cubic-bezier(.2,.9,.3,1);
+    }
+    .card.visible{opacity:1; transform:none}
+
+    .grid{
+      display:grid;
+      gap:18px;
+      grid-template-columns: repeat(2, 1fr);
+    }
+    @media (max-width:800px){ .grid{ grid-template-columns:1fr } }
+
+    h2{color:var(--accent); margin-top:0}
+    .muted{color:var(--muted)}
+
+    .tag{
+      display:inline-block;
+      padding:6px 10px;
+      border-radius:999px;
+      background:linear-gradient(90deg, rgba(43,108,176,0.12), rgba(75,121,161,0.08));
+      color:var(--accent);
+      font-weight:600;
+      font-size:0.85rem;
+      margin-right:8px;
+    }
+
+    footer{
+      text-align:center;
+      color:var(--muted);
+      padding:28px 18px;
+      font-size:0.95rem;
+    }
+
+    /* small info section */
+    .meta{display:flex; gap:16px; align-items:center; flex-wrap:wrap}
+    .meta .info{background:linear-gradient(180deg,#fff,#fbfdff); padding:10px 14px; border-radius:10px; box-shadow:0 6px 18px rgba(15,23,42,0.04);}
+
+    /* CTA */
+    .cta{
+      display:inline-block;
+      margin-top:12px;
+      background:var(--accent);
+      color:white;
+      padding:10px 14px;
+      border-radius:10px;
+      text-decoration:none;
+      box-shadow: 0 8px 20px rgba(43,108,176,0.18);
+    }
+
+    /* small list */
+    ul{padding-left:1.1rem}
+
+    /* animated sparkline */
+    .spark-wrap{width:100%;height:160px}
+
+    /* author quote */
+    .quote{
+      font-style:italic;
+      color:#0b1220;
+      background: linear-gradient(90deg, rgba(43,108,176,0.04), rgba(75,121,161,0.02));
+      padding:14px;
+      border-radius:10px;
+    }
+
+    /* small table */
+    table{width:100%;border-collapse:collapse}
+    td, th{padding:8px;border-bottom:1px solid #f0f2f7;text-align:left}
+
+    /* subtle floating effect for hero image placeholder */
+    .hero-figure{
+      width:120px;height:120px;border-radius:14px;background:linear-gradient(180deg,#fff,#f0f6ff);
+      display:inline-flex;align-items:center;justify-content:center;box-shadow: 0 12px 40px rgba(43,108,176,0.08);
+      font-weight:700;color:var(--accent);font-size:0.9rem;
+    }
+
+  </style>
+</head>
+<body>
+  <header>
+    <div style="max-width:980px;margin:auto;">
+      <div style="display:flex;align-items:center;gap:18px;justify-content:center;flex-wrap:wrap">
+        <div class="hero-figure">PreSeizure</div>
+        <div>
+          <h1>PreSeizure — Wearable AI Seizure Prediction</h1>
+          <p>Predicting epileptic seizures minutes before onset using PPG heart-rate variability and motion sensors.</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="card reveal">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
+        <div>
+          <div class="tag">Research Project</div>
+          <h2>Overview</h2>
+          <p class="muted">PreSeizure is a high-school research project by <strong>Sandra Ali Abdulhadi Alalmai</strong>, a 16-year-old researcher. The project investigates whether wearable sensors and AI can provide early warning of epileptic seizures to improve safety and response time.</p>
+        </div>
+        <div style="max-width:420px">
+          <div class="quote">"I had so much fun working on this project — designing models, testing signals, and building prototypes felt like real science. I love it!" — <strong>Sandra</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card reveal">
+        <h2>Methods</h2>
+        <p class="muted">We use a combination of signal processing and machine learning:</p>
+        <ul>
+          <li>Preprocessing: sliding windows across PPG and accelerometer signals</li>
+          <li>Feature extraction: HRV time-domain features (SDNN, RMSSD, pNN50) and motion statistics</li>
+          <li>Models: Random Forest baseline and 1D-CNN / LSTM deep models</li>
+          <li>Explainability: SHAP for model interpretability and feature importance</li>
+        </ul>
+        <a class="cta" href="#results">See sample results</a>
+      </div>
+
+      <div class="card reveal">
+        <h2>Experiment Setup</h2>
+        <table>
+          <tr><th>Sensor</th><td>PPG (wrist), 3-axis accelerometer</td></tr>
+          <tr><th>Window</th><td>30s non-overlapping (example)</td></tr>
+          <tr><th>Labeling</th><td>Pre-ictal vs inter-ictal sliding windows</td></tr>
+          <tr><th>Evaluation</th><td>Event-level metrics: sensitivity, FAR/hr, median lead time</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card reveal" id="results">
+      <h2>Results (Sample / Demo)</h2>
+      <p class="muted">Below are simulated example charts to illustrate what visualizations for this project might look like. They use placeholder data but match how real results would be presented.</p>
+
+      <div style="display:grid;grid-template-columns:1fr 400px;gap:18px;">
+        <div>
+          <canvas id="hrvChart" style="width:100%;height:320px"></canvas>
+        </div>
+        <div>
+          <canvas id="perfChart" style="width:100%;height:240px"></canvas>
+          <div style="margin-top:12px">
+            <p style="margin:6px 0;font-weight:600">Key metrics</p>
+            <ul style="margin:0;padding-left:1rem">
+              <li>Sensitivity (demo): <strong>87%</strong></li>
+              <li>False alarms: <strong>0.8 / hr</strong></li>
+              <li>Median lead time: <strong>4.2 min</strong></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card reveal">
+      <h2>Next Steps & Extensions</h2>
+      <ul>
+        <li>Collect more wearable PPG datasets with consent</li>
+        <li>Perform patient-wise cross-validation and event-level scoring</li>
+        <li>Deploy an on-device prototype (phone + wearable) with real-time alarm</li>
+        <li>Run ablation studies and improve model explainability</li>
+      </ul>
+    </div>
+
+    <div class="card reveal">
+      <h2>Code & Data</h2>
+      <p class="muted">Code notebooks, preprocessing steps, and model training scripts are available in the project repository. The CHB-MIT dataset (EEG) used for reference is available on PhysioNet:</p>
+      <p><a href="https://physionet.org/content/chbmit/1.0.0/" target="_blank">https://physionet.org/content/chbmit/1.0.0/</a></p>
+      <p class="muted">If you want, I can add links to the actual notebooks and a demo video here.</p>
+    </div>
+
+    <div class="card reveal">
+      <h2>About the Researcher</h2>
+      <p><strong>Sandra Ali Abdulhadi Alalmai</strong><br><span class="muted">16-year-old researcher</span></p>
+      <p class="muted">Sandra focused on bridging wearable sensing and machine learning to help people with epilepsy. She enjoyed the hands-on experiments and learning how models make decisions.</p>
+      <p style="margin-top:12px"><strong>Contact:</strong> [your-email@example.com]</p>
+    </div>
+
+  </main>
+
+  <footer>
+    <div style="max-width:980px;margin:auto">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <div>© 2025 PreSeizure • Built by Sandra Ali Abdulhadi Alalmai</div>
+        <div class="muted">Made with care — science & curiosity</div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Reveal on scroll
+    function revealAll(){
+      document.querySelectorAll('.reveal').forEach((el, i) => {
+        const rect = el.getBoundingClientRect();
+        if(rect.top < window.innerHeight - 80){
+          el.classList.add('visible');
+        }
+      });
+    }
+    window.addEventListener('scroll', revealAll);
+    window.addEventListener('load', () => {
+      revealAll();
+      initCharts();
+    });
+
+    // Chart examples (simulated data)
+    function initCharts(){
+      // HRV over time (simulated)
+      const ctx = document.getElementById('hrvChart').getContext('2d');
+      const labels = [...Array(60)].map((_,i) => (i - 59) + ' min'); // last 60 minutes
+      const hrvData = labels.map((_,i) => 45 + 6 * Math.sin(i*0.15) + (Math.random()-0.5)*4);
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'SDNN (ms) — sample',
+            data: hrvData,
+            fill: true,
+            tension: 0.35,
+            backgroundColor: 'rgba(43,108,176,0.08)',
+            borderColor: 'rgba(43,108,176,0.95)',
+            pointRadius: 0
+          }]
+        },
+        options: {
+          responsive:true,
+          maintainAspectRatio:false,
+          plugins:{
+            legend:{display:true}
+          },
+          scales:{
+            x:{display:false},
+            y:{beginAtZero:false}
+          }
+        }
+      });
+
+      // Performance bar chart (simulated)
+      const ctx2 = document.getElementById('perfChart').getContext('2d');
+      new Chart(ctx2, {
+        type: 'bar',
+        data: {
+          labels: ['Random Forest','1D-CNN','LSTM'],
+          datasets:[{
+            label:'Sensitivity (%)',
+            data:[78,85,87],
+            backgroundColor:['rgba(43,108,176,0.9)','rgba(75,121,161,0.9)','rgba(106,156,212,0.9)']
+          }]
+        },
+        options:{
+          responsive:true,
+          maintainAspectRatio:false,
+          plugins:{legend:{display:false}},
+          scales:{y:{beginAtZero:true,max:100}}
+        }
+      });
+    }
+  </script>
+</body>
+</html>
